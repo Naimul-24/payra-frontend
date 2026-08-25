@@ -13,6 +13,8 @@ export interface RunOptions {
   failMessage?: string;
   /** Override the default latency for this run. */
   delay?: number;
+  /** Runs after a successful simulated response. */
+  onSuccess?: () => void;
 }
 
 export function useSimulatedRequest(defaultDelay = 1400) {
@@ -38,6 +40,7 @@ export function useSimulatedRequest(defaultDelay = 1400) {
           setStatus("error");
         } else {
           setStatus("success");
+          options.onSuccess?.();
         }
       }, options.delay ?? defaultDelay);
     },

@@ -183,7 +183,7 @@ function RequestMoneyPage() {
                             checked={contactId === item.id}
                             onChange={() => setContactId(item.id)}
                           />
-                          <UserAvatar name={item.name} />
+                          <UserAvatar initials={item.name.split(" ").map((part) => part[0]).slice(0, 2).join("")} />
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-sm font-semibold text-foreground">{item.name}</span>
                             <span className="block truncate text-xs text-muted-foreground">{item.handle}</span>
