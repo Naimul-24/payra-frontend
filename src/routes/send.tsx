@@ -42,11 +42,11 @@ function SendPage() {
   const [step, setStep] = useState(0);
   const [method, setMethod] = useState(methods[3]);
   const [query, setQuery] = useState("");
-  const [recipientId, setRecipientId] = useState(contacts[0].id);
+  const [recipientId, setRecipientId] = useState(contacts[0]!.id);
   const [amount, setAmount] = useState("2500");
   const [note, setNote] = useState("");
   const [category, setCategory] = useState(categories[0]);
-  const [sourceId, setSourceId] = useState(paymentSources[0].id);
+  const [sourceId, setSourceId] = useState(paymentSources[0]!.id);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [done, setDone] = useState(false);
 
