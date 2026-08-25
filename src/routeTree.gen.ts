@@ -18,6 +18,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReceiveRouteImport } from './routes/receive'
+import { Route as RequestRouteImport } from './routes/request'
 import { Route as ScanRouteImport } from './routes/scan'
 import { Route as SendRouteImport } from './routes/send'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -72,6 +73,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const ReceiveRoute = ReceiveRouteImport.update({
   id: '/receive',
   path: '/receive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RequestRoute = RequestRouteImport.update({
+  id: '/request',
+  path: '/request',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScanRoute = ScanRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/receive': typeof ReceiveRoute
+  '/request': typeof RequestRoute
   '/scan': typeof ScanRoute
   '/send': typeof SendRoute
   '/settings': typeof SettingsRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/receive': typeof ReceiveRoute
+  '/request': typeof RequestRoute
   '/scan': typeof ScanRoute
   '/send': typeof SendRoute
   '/settings': typeof SettingsRoute
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/receive': typeof ReceiveRoute
+  '/request': typeof RequestRoute
   '/scan': typeof ScanRoute
   '/send': typeof SendRoute
   '/settings': typeof SettingsRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/receive'
+    | '/request'
     | '/scan'
     | '/send'
     | '/settings'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/receive'
+    | '/request'
     | '/scan'
     | '/send'
     | '/settings'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/receive'
+    | '/request'
     | '/scan'
     | '/send'
     | '/settings'
@@ -265,6 +277,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   ProfileRoute: typeof ProfileRoute
   ReceiveRoute: typeof ReceiveRoute
+  RequestRoute: typeof RequestRoute
   ScanRoute: typeof ScanRoute
   SendRoute: typeof SendRoute
   SettingsRoute: typeof SettingsRoute
@@ -339,6 +352,13 @@ declare module '@tanstack/react-router' {
       path: '/receive'
       fullPath: '/receive'
       preLoaderRoute: typeof ReceiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/request': {
+      id: '/request'
+      path: '/request'
+      fullPath: '/request'
+      preLoaderRoute: typeof RequestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/scan': {
@@ -435,6 +455,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   ProfileRoute: ProfileRoute,
   ReceiveRoute: ReceiveRoute,
+  RequestRoute: RequestRoute,
   ScanRoute: ScanRoute,
   SendRoute: SendRoute,
   SettingsRoute: SettingsRoute,
