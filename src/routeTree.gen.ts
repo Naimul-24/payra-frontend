@@ -23,9 +23,9 @@ import { Route as ScanRouteImport } from './routes/scan'
 import { Route as SendRouteImport } from './routes/send'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as SourcesRouteImport } from './routes/sources'
 import { Route as VerifyOtpRouteImport } from './routes/verify-otp'
 import { Route as WithdrawRouteImport } from './routes/withdraw'
+import { Route as SourcesIndexRouteImport } from './routes/sources.index'
 import { Route as TransactionsIndexRouteImport } from './routes/transactions.index'
 import { Route as TransactionsIdRouteImport } from './routes/transactions.$id'
 import { Route as SourcesConnectKindRouteImport } from './routes/sources.connect.$kind'
@@ -100,11 +100,6 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SourcesRoute = SourcesRouteImport.update({
-  id: '/sources',
-  path: '/sources',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const VerifyOtpRoute = VerifyOtpRouteImport.update({
   id: '/verify-otp',
   path: '/verify-otp',
@@ -113,6 +108,11 @@ const VerifyOtpRoute = VerifyOtpRouteImport.update({
 const WithdrawRoute = WithdrawRouteImport.update({
   id: '/withdraw',
   path: '/withdraw',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SourcesIndexRoute = SourcesIndexRouteImport.update({
+  id: '/sources/',
+  path: '/sources/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TransactionsIndexRoute = TransactionsIndexRouteImport.update({
@@ -126,9 +126,9 @@ const TransactionsIdRoute = TransactionsIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const SourcesConnectKindRoute = SourcesConnectKindRouteImport.update({
-  id: '/connect/$kind',
-  path: '/connect/$kind',
-  getParentRoute: () => SourcesRoute,
+  id: '/sources/connect/$kind',
+  path: '/sources/connect/$kind',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -146,10 +146,10 @@ export interface FileRoutesByFullPath {
   '/send': typeof SendRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/sources': typeof SourcesRouteWithChildren
   '/verify-otp': typeof VerifyOtpRoute
   '/withdraw': typeof WithdrawRoute
   '/transactions/$id': typeof TransactionsIdRoute
+  '/sources/': typeof SourcesIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
   '/sources/connect/$kind': typeof SourcesConnectKindRoute
 }
@@ -168,10 +168,10 @@ export interface FileRoutesByTo {
   '/send': typeof SendRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/sources': typeof SourcesRouteWithChildren
   '/verify-otp': typeof VerifyOtpRoute
   '/withdraw': typeof WithdrawRoute
   '/transactions/$id': typeof TransactionsIdRoute
+  '/sources': typeof SourcesIndexRoute
   '/transactions': typeof TransactionsIndexRoute
   '/sources/connect/$kind': typeof SourcesConnectKindRoute
 }
@@ -191,10 +191,10 @@ export interface FileRoutesById {
   '/send': typeof SendRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/sources': typeof SourcesRouteWithChildren
   '/verify-otp': typeof VerifyOtpRoute
   '/withdraw': typeof WithdrawRoute
   '/transactions/$id': typeof TransactionsIdRoute
+  '/sources/': typeof SourcesIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
   '/sources/connect/$kind': typeof SourcesConnectKindRoute
 }
@@ -215,10 +215,10 @@ export interface FileRouteTypes {
     | '/send'
     | '/settings'
     | '/signup'
-    | '/sources'
     | '/verify-otp'
     | '/withdraw'
     | '/transactions/$id'
+    | '/sources/'
     | '/transactions/'
     | '/sources/connect/$kind'
   fileRoutesByTo: FileRoutesByTo
@@ -237,10 +237,10 @@ export interface FileRouteTypes {
     | '/send'
     | '/settings'
     | '/signup'
-    | '/sources'
     | '/verify-otp'
     | '/withdraw'
     | '/transactions/$id'
+    | '/sources'
     | '/transactions'
     | '/sources/connect/$kind'
   id:
@@ -259,10 +259,10 @@ export interface FileRouteTypes {
     | '/send'
     | '/settings'
     | '/signup'
-    | '/sources'
     | '/verify-otp'
     | '/withdraw'
     | '/transactions/$id'
+    | '/sources/'
     | '/transactions/'
     | '/sources/connect/$kind'
   fileRoutesById: FileRoutesById
@@ -282,11 +282,12 @@ export interface RootRouteChildren {
   SendRoute: typeof SendRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
-  SourcesRoute: typeof SourcesRouteWithChildren
   VerifyOtpRoute: typeof VerifyOtpRoute
   WithdrawRoute: typeof WithdrawRoute
   TransactionsIdRoute: typeof TransactionsIdRoute
+  SourcesIndexRoute: typeof SourcesIndexRoute
   TransactionsIndexRoute: typeof TransactionsIndexRoute
+  SourcesConnectKindRoute: typeof SourcesConnectKindRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -389,13 +390,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sources': {
-      id: '/sources'
-      path: '/sources'
-      fullPath: '/sources'
-      preLoaderRoute: typeof SourcesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/verify-otp': {
       id: '/verify-otp'
       path: '/verify-otp'
@@ -408,6 +402,13 @@ declare module '@tanstack/react-router' {
       path: '/withdraw'
       fullPath: '/withdraw'
       preLoaderRoute: typeof WithdrawRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sources/': {
+      id: '/sources/'
+      path: '/sources'
+      fullPath: '/sources/'
+      preLoaderRoute: typeof SourcesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/transactions/': {
@@ -426,24 +427,13 @@ declare module '@tanstack/react-router' {
     }
     '/sources/connect/$kind': {
       id: '/sources/connect/$kind'
-      path: '/connect/$kind'
+      path: '/sources/connect/$kind'
       fullPath: '/sources/connect/$kind'
       preLoaderRoute: typeof SourcesConnectKindRouteImport
-      parentRoute: typeof SourcesRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface SourcesRouteChildren {
-  SourcesConnectKindRoute: typeof SourcesConnectKindRoute
-}
-
-const SourcesRouteChildren: SourcesRouteChildren = {
-  SourcesConnectKindRoute: SourcesConnectKindRoute,
-}
-
-const SourcesRouteWithChildren =
-  SourcesRoute._addFileChildren(SourcesRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -460,11 +450,12 @@ const rootRouteChildren: RootRouteChildren = {
   SendRoute: SendRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
-  SourcesRoute: SourcesRouteWithChildren,
   VerifyOtpRoute: VerifyOtpRoute,
   WithdrawRoute: WithdrawRoute,
   TransactionsIdRoute: TransactionsIdRoute,
+  SourcesIndexRoute: SourcesIndexRoute,
   TransactionsIndexRoute: TransactionsIndexRoute,
+  SourcesConnectKindRoute: SourcesConnectKindRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
