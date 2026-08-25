@@ -14,6 +14,10 @@ import {
   User,
   Wallet,
   ArrowDownLeft,
+  ArrowUpRight,
+  HandCoins,
+  Plus,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PayraLogo } from "./logo";
@@ -25,9 +29,13 @@ const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: Home },
   { to: "/send", label: "Send Money", icon: Send },
   { to: "/receive", label: "Receive Money", icon: ArrowDownLeft },
+  { to: "/request", label: "Request Money", icon: HandCoins },
+  { to: "/add-money", label: "Add Money", icon: Plus },
+  { to: "/withdraw", label: "Withdraw", icon: ArrowUpRight },
   { to: "/scan", label: "Scan QR", icon: QrCode },
   { to: "/transactions", label: "Transactions", icon: Receipt },
   { to: "/sources", label: "Payment Sources", icon: CreditCard },
+  { to: "/kyc", label: "Verify Identity", icon: ShieldCheck },
   { to: "/profile", label: "Profile", icon: User },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
