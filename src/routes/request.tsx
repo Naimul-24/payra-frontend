@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Copy, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { AppShell } from "@/components/payra/app-shell";
-import { SectionHeading, SoftButton, StatusPill, SuccessState, SurfaceCard } from "@/components/payra/ui-kit";
+import { SectionHeading, SoftButton, SuccessState, SurfaceCard } from "@/components/payra/ui-kit";
 import {
   AmountField,
   FailureState,
