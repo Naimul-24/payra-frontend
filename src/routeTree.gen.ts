@@ -27,6 +27,7 @@ import { Route as VerifyOtpRouteImport } from './routes/verify-otp'
 import { Route as WithdrawRouteImport } from './routes/withdraw'
 import { Route as TransactionsIndexRouteImport } from './routes/transactions.index'
 import { Route as TransactionsIdRouteImport } from './routes/transactions.$id'
+import { Route as SourcesConnectKindRouteImport } from './routes/sources.connect.$kind'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -118,6 +119,11 @@ const TransactionsIdRoute = TransactionsIdRouteImport.update({
   path: '/transactions/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SourcesConnectKindRoute = SourcesConnectKindRouteImport.update({
+  id: '/connect/$kind',
+  path: '/connect/$kind',
+  getParentRoute: () => SourcesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -133,11 +139,12 @@ export interface FileRoutesByFullPath {
   '/send': typeof SendRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/sources': typeof SourcesRoute
+  '/sources': typeof SourcesRouteWithChildren
   '/verify-otp': typeof VerifyOtpRoute
   '/withdraw': typeof WithdrawRoute
   '/transactions/$id': typeof TransactionsIdRoute
   '/transactions/': typeof TransactionsIndexRoute
+  '/sources/connect/$kind': typeof SourcesConnectKindRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -153,11 +160,12 @@ export interface FileRoutesByTo {
   '/send': typeof SendRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/sources': typeof SourcesRoute
+  '/sources': typeof SourcesRouteWithChildren
   '/verify-otp': typeof VerifyOtpRoute
   '/withdraw': typeof WithdrawRoute
   '/transactions/$id': typeof TransactionsIdRoute
   '/transactions': typeof TransactionsIndexRoute
+  '/sources/connect/$kind': typeof SourcesConnectKindRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -174,11 +182,12 @@ export interface FileRoutesById {
   '/send': typeof SendRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/sources': typeof SourcesRoute
+  '/sources': typeof SourcesRouteWithChildren
   '/verify-otp': typeof VerifyOtpRoute
   '/withdraw': typeof WithdrawRoute
   '/transactions/$id': typeof TransactionsIdRoute
   '/transactions/': typeof TransactionsIndexRoute
+  '/sources/connect/$kind': typeof SourcesConnectKindRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/withdraw'
     | '/transactions/$id'
     | '/transactions/'
+    | '/sources/connect/$kind'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/withdraw'
     | '/transactions/$id'
     | '/transactions'
+    | '/sources/connect/$kind'
   id:
     | '__root__'
     | '/'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/withdraw'
     | '/transactions/$id'
     | '/transactions/'
+    | '/sources/connect/$kind'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -257,7 +269,7 @@ export interface RootRouteChildren {
   SendRoute: typeof SendRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
-  SourcesRoute: typeof SourcesRoute
+  SourcesRoute: typeof SourcesRouteWithChildren
   VerifyOtpRoute: typeof VerifyOtpRoute
   WithdrawRoute: typeof WithdrawRoute
   TransactionsIdRoute: typeof TransactionsIdRoute
@@ -392,8 +404,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TransactionsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sources/connect/$kind': {
+      id: '/sources/connect/$kind'
+      path: '/connect/$kind'
+      fullPath: '/sources/connect/$kind'
+      preLoaderRoute: typeof SourcesConnectKindRouteImport
+      parentRoute: typeof SourcesRoute
+    }
   }
 }
+
+interface SourcesRouteChildren {
+  SourcesConnectKindRoute: typeof SourcesConnectKindRoute
+}
+
+const SourcesRouteChildren: SourcesRouteChildren = {
+  SourcesConnectKindRoute: SourcesConnectKindRoute,
+}
+
+const SourcesRouteWithChildren =
+  SourcesRoute._addFileChildren(SourcesRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -409,7 +439,7 @@ const rootRouteChildren: RootRouteChildren = {
   SendRoute: SendRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
-  SourcesRoute: SourcesRoute,
+  SourcesRoute: SourcesRouteWithChildren,
   VerifyOtpRoute: VerifyOtpRoute,
   WithdrawRoute: WithdrawRoute,
   TransactionsIdRoute: TransactionsIdRoute,
