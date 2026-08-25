@@ -283,3 +283,97 @@ export function formatDateTime(iso: string) {
 export function getTransaction(id: string) {
   return transactions.find((t) => t.id === id);
 }
+
+/* ------------------------------------------------------------------ */
+/* Prototype-only additions for the money-movement and KYC flows.      */
+/* ------------------------------------------------------------------ */
+
+export type PaymentRequestStatus = "pending" | "paid" | "declined" | "expired";
+
+export interface PaymentRequestItem {
+  id: string;
+  contactName: string;
+  handle: string;
+  amount: number;
+  note?: string;
+  status: PaymentRequestStatus;
+  date: string; // ISO
+  direction: "outgoing" | "incoming";
+}
+
+export const paymentRequests: PaymentRequestItem[] = [
+  {
+    id: "REQ-2026-41208",
+    contactName: "Rahim Ahmed",
+    handle: "@rahim",
+    amount: 2000,
+    note: "Dinner at Gulshan",
+    status: "pending",
+    date: "2026-08-25T09:40:00+06:00",
+    direction: "outgoing",
+  },
+  {
+    id: "REQ-2026-41155",
+    contactName: "Nusrat Jahan",
+    handle: "@nusrat",
+    amount: 1500,
+    note: "Concert ticket",
+    status: "paid",
+    date: "2026-08-23T15:10:00+06:00",
+    direction: "outgoing",
+  },
+  {
+    id: "REQ-2026-41088",
+    contactName: "Karim Hasan",
+    handle: "@karimh",
+    amount: 850,
+    note: "Cab share",
+    status: "declined",
+    date: "2026-08-21T11:02:00+06:00",
+    direction: "outgoing",
+  },
+  {
+    id: "REQ-2026-40977",
+    contactName: "Sadia Islam",
+    handle: "@sadia",
+    amount: 3200,
+    note: "Course fee split",
+    status: "pending",
+    date: "2026-08-20T18:25:00+06:00",
+    direction: "incoming",
+  },
+];
+
+export type KycStatus = "unverified" | "pending" | "verified" | "rejected";
+
+export const kycProfile: {
+  status: KycStatus;
+  level: string;
+  limitPerDay: number;
+} = {
+  status: "unverified",
+  level: "Basic",
+  limitPerDay: 25000,
+};
+
+export const documentTypes = [
+  { id: "nid", label: "National ID (NID)", detail: "Smart card or paper NID" },
+  { id: "passport", label: "Passport", detail: "Machine-readable data page" },
+  { id: "driving", label: "Driving Licence", detail: "Front and back required" },
+] as const;
+
+export type DocumentTypeId = (typeof documentTypes)[number]["id"];
+
+/** Fee model for the prototype flows. */
+export function calcFee(kind: "add" | "withdraw" | "request", amount: number) {
+  if (!Number.isFinite(amount) || amount <= 0) return 0;
+  if (kind === "request") return 0;
+  if (kind === "add") return amount > 10000 ? Math.round(amount * 0.005) : 0;
+  return Math.max(10, Math.round(amount * 0.0085));
+}
+
+/** Generates a prototype transaction/request reference. Call in event handlers only. */
+export function makeReference(prefix = "PAY") {
+  const random = Math.floor(100000 + Math.random() * 899999);
+  return `${prefix}-${new Date().getFullYear()}-${random}`;
+}

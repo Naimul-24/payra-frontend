@@ -10,27 +10,49 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AddMoneyRouteImport } from './routes/add-money'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as KycRouteImport } from './routes/kyc'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReceiveRouteImport } from './routes/receive'
+import { Route as RequestRouteImport } from './routes/request'
 import { Route as ScanRouteImport } from './routes/scan'
 import { Route as SendRouteImport } from './routes/send'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as SourcesRouteImport } from './routes/sources'
+import { Route as VerifyOtpRouteImport } from './routes/verify-otp'
+import { Route as WithdrawRouteImport } from './routes/withdraw'
+import { Route as SourcesIndexRouteImport } from './routes/sources.index'
 import { Route as TransactionsIndexRouteImport } from './routes/transactions.index'
 import { Route as TransactionsIdRouteImport } from './routes/transactions.$id'
+import { Route as SourcesConnectKindRouteImport } from './routes/sources.connect.$kind'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AddMoneyRoute = AddMoneyRouteImport.update({
+  id: '/add-money',
+  path: '/add-money',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KycRoute = KycRouteImport.update({
+  id: '/kyc',
+  path: '/kyc',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -53,6 +75,11 @@ const ReceiveRoute = ReceiveRouteImport.update({
   path: '/receive',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RequestRoute = RequestRouteImport.update({
+  id: '/request',
+  path: '/request',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ScanRoute = ScanRouteImport.update({
   id: '/scan',
   path: '/scan',
@@ -73,9 +100,19 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SourcesRoute = SourcesRouteImport.update({
-  id: '/sources',
-  path: '/sources',
+const VerifyOtpRoute = VerifyOtpRouteImport.update({
+  id: '/verify-otp',
+  path: '/verify-otp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WithdrawRoute = WithdrawRouteImport.update({
+  id: '/withdraw',
+  path: '/withdraw',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SourcesIndexRoute = SourcesIndexRouteImport.update({
+  id: '/sources/',
+  path: '/sources/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TransactionsIndexRoute = TransactionsIndexRouteImport.update({
@@ -88,115 +125,169 @@ const TransactionsIdRoute = TransactionsIdRouteImport.update({
   path: '/transactions/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SourcesConnectKindRoute = SourcesConnectKindRouteImport.update({
+  id: '/sources/connect/$kind',
+  path: '/sources/connect/$kind',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/add-money': typeof AddMoneyRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/kyc': typeof KycRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/receive': typeof ReceiveRoute
+  '/request': typeof RequestRoute
   '/scan': typeof ScanRoute
   '/send': typeof SendRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/sources': typeof SourcesRoute
+  '/verify-otp': typeof VerifyOtpRoute
+  '/withdraw': typeof WithdrawRoute
   '/transactions/$id': typeof TransactionsIdRoute
+  '/sources/': typeof SourcesIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
+  '/sources/connect/$kind': typeof SourcesConnectKindRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/add-money': typeof AddMoneyRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/kyc': typeof KycRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/receive': typeof ReceiveRoute
+  '/request': typeof RequestRoute
   '/scan': typeof ScanRoute
   '/send': typeof SendRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/sources': typeof SourcesRoute
+  '/verify-otp': typeof VerifyOtpRoute
+  '/withdraw': typeof WithdrawRoute
   '/transactions/$id': typeof TransactionsIdRoute
+  '/sources': typeof SourcesIndexRoute
   '/transactions': typeof TransactionsIndexRoute
+  '/sources/connect/$kind': typeof SourcesConnectKindRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/add-money': typeof AddMoneyRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/kyc': typeof KycRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/receive': typeof ReceiveRoute
+  '/request': typeof RequestRoute
   '/scan': typeof ScanRoute
   '/send': typeof SendRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/sources': typeof SourcesRoute
+  '/verify-otp': typeof VerifyOtpRoute
+  '/withdraw': typeof WithdrawRoute
   '/transactions/$id': typeof TransactionsIdRoute
+  '/sources/': typeof SourcesIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
+  '/sources/connect/$kind': typeof SourcesConnectKindRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/add-money'
     | '/dashboard'
+    | '/forgot-password'
+    | '/kyc'
     | '/login'
     | '/notifications'
     | '/profile'
     | '/receive'
+    | '/request'
     | '/scan'
     | '/send'
     | '/settings'
     | '/signup'
-    | '/sources'
+    | '/verify-otp'
+    | '/withdraw'
     | '/transactions/$id'
+    | '/sources/'
     | '/transactions/'
+    | '/sources/connect/$kind'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/add-money'
     | '/dashboard'
+    | '/forgot-password'
+    | '/kyc'
     | '/login'
     | '/notifications'
     | '/profile'
     | '/receive'
+    | '/request'
     | '/scan'
     | '/send'
     | '/settings'
     | '/signup'
-    | '/sources'
+    | '/verify-otp'
+    | '/withdraw'
     | '/transactions/$id'
+    | '/sources'
     | '/transactions'
+    | '/sources/connect/$kind'
   id:
     | '__root__'
     | '/'
+    | '/add-money'
     | '/dashboard'
+    | '/forgot-password'
+    | '/kyc'
     | '/login'
     | '/notifications'
     | '/profile'
     | '/receive'
+    | '/request'
     | '/scan'
     | '/send'
     | '/settings'
     | '/signup'
-    | '/sources'
+    | '/verify-otp'
+    | '/withdraw'
     | '/transactions/$id'
+    | '/sources/'
     | '/transactions/'
+    | '/sources/connect/$kind'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AddMoneyRoute: typeof AddMoneyRoute
   DashboardRoute: typeof DashboardRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  KycRoute: typeof KycRoute
   LoginRoute: typeof LoginRoute
   NotificationsRoute: typeof NotificationsRoute
   ProfileRoute: typeof ProfileRoute
   ReceiveRoute: typeof ReceiveRoute
+  RequestRoute: typeof RequestRoute
   ScanRoute: typeof ScanRoute
   SendRoute: typeof SendRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
-  SourcesRoute: typeof SourcesRoute
+  VerifyOtpRoute: typeof VerifyOtpRoute
+  WithdrawRoute: typeof WithdrawRoute
   TransactionsIdRoute: typeof TransactionsIdRoute
+  SourcesIndexRoute: typeof SourcesIndexRoute
   TransactionsIndexRoute: typeof TransactionsIndexRoute
+  SourcesConnectKindRoute: typeof SourcesConnectKindRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -208,11 +299,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/add-money': {
+      id: '/add-money'
+      path: '/add-money'
+      fullPath: '/add-money'
+      preLoaderRoute: typeof AddMoneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kyc': {
+      id: '/kyc'
+      path: '/kyc'
+      fullPath: '/kyc'
+      preLoaderRoute: typeof KycRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -243,6 +355,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReceiveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/request': {
+      id: '/request'
+      path: '/request'
+      fullPath: '/request'
+      preLoaderRoute: typeof RequestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/scan': {
       id: '/scan'
       path: '/scan'
@@ -271,11 +390,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sources': {
-      id: '/sources'
+    '/verify-otp': {
+      id: '/verify-otp'
+      path: '/verify-otp'
+      fullPath: '/verify-otp'
+      preLoaderRoute: typeof VerifyOtpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/withdraw': {
+      id: '/withdraw'
+      path: '/withdraw'
+      fullPath: '/withdraw'
+      preLoaderRoute: typeof WithdrawRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sources/': {
+      id: '/sources/'
       path: '/sources'
-      fullPath: '/sources'
-      preLoaderRoute: typeof SourcesRouteImport
+      fullPath: '/sources/'
+      preLoaderRoute: typeof SourcesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/transactions/': {
@@ -292,23 +425,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TransactionsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sources/connect/$kind': {
+      id: '/sources/connect/$kind'
+      path: '/sources/connect/$kind'
+      fullPath: '/sources/connect/$kind'
+      preLoaderRoute: typeof SourcesConnectKindRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AddMoneyRoute: AddMoneyRoute,
   DashboardRoute: DashboardRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  KycRoute: KycRoute,
   LoginRoute: LoginRoute,
   NotificationsRoute: NotificationsRoute,
   ProfileRoute: ProfileRoute,
   ReceiveRoute: ReceiveRoute,
+  RequestRoute: RequestRoute,
   ScanRoute: ScanRoute,
   SendRoute: SendRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
-  SourcesRoute: SourcesRoute,
+  VerifyOtpRoute: VerifyOtpRoute,
+  WithdrawRoute: WithdrawRoute,
   TransactionsIdRoute: TransactionsIdRoute,
+  SourcesIndexRoute: SourcesIndexRoute,
   TransactionsIndexRoute: TransactionsIndexRoute,
+  SourcesConnectKindRoute: SourcesConnectKindRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

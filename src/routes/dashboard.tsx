@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowDownLeft, Plus, QrCode, Send } from "lucide-react";
+import { ArrowRight, ArrowDownLeft, ArrowUpRight, HandCoins, Plus, QrCode, Send } from "lucide-react";
 import { AppShell } from "@/components/payra/app-shell";
 import { BalanceCard, PaymentSourceCard, TransactionCard } from "@/components/payra/cards";
 import { SectionHeading, SurfaceCard, TrustBadges } from "@/components/payra/ui-kit";
@@ -27,7 +27,9 @@ const quickActions = [
   { to: "/send", label: "Send Money", icon: Send },
   { to: "/receive", label: "Receive Money", icon: ArrowDownLeft },
   { to: "/scan", label: "Scan QR", icon: QrCode },
-  { to: "/sources", label: "Add Money", icon: Plus },
+  { to: "/add-money", label: "Add Money", icon: Plus },
+  { to: "/withdraw", label: "Withdraw", icon: ArrowUpRight },
+  { to: "/request", label: "Request", icon: HandCoins },
 ] as const;
 
 function Dashboard() {
@@ -53,7 +55,7 @@ function Dashboard() {
             last4={currentUser.cardLast4}
           />
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {quickActions.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to + label}
