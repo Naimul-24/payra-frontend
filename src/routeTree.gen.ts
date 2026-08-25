@@ -12,9 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReceiveRouteImport } from './routes/receive'
+import { Route as ScanRouteImport } from './routes/scan'
 import { Route as SendRouteImport } from './routes/send'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SourcesRouteImport } from './routes/sources'
+import { Route as TransactionsIndexRouteImport } from './routes/transactions.index'
+import { Route as TransactionsIdRouteImport } from './routes/transactions.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -31,9 +38,24 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReceiveRoute = ReceiveRouteImport.update({
   id: '/receive',
   path: '/receive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScanRoute = ScanRouteImport.update({
+  id: '/scan',
+  path: '/scan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SendRoute = SendRouteImport.update({
@@ -41,9 +63,29 @@ const SendRoute = SendRouteImport.update({
   path: '/send',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SourcesRoute = SourcesRouteImport.update({
+  id: '/sources',
+  path: '/sources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransactionsIndexRoute = TransactionsIndexRouteImport.update({
+  id: '/transactions/',
+  path: '/transactions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransactionsIdRoute = TransactionsIdRouteImport.update({
+  id: '/transactions/$id',
+  path: '/transactions/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -51,49 +93,110 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
   '/receive': typeof ReceiveRoute
+  '/scan': typeof ScanRoute
   '/send': typeof SendRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/sources': typeof SourcesRoute
+  '/transactions/$id': typeof TransactionsIdRoute
+  '/transactions/': typeof TransactionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
   '/receive': typeof ReceiveRoute
+  '/scan': typeof ScanRoute
   '/send': typeof SendRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/sources': typeof SourcesRoute
+  '/transactions/$id': typeof TransactionsIdRoute
+  '/transactions': typeof TransactionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
   '/receive': typeof ReceiveRoute
+  '/scan': typeof ScanRoute
   '/send': typeof SendRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/sources': typeof SourcesRoute
+  '/transactions/$id': typeof TransactionsIdRoute
+  '/transactions/': typeof TransactionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login' | '/receive' | '/send' | '/signup'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/notifications'
+    | '/profile'
+    | '/receive'
+    | '/scan'
+    | '/send'
+    | '/settings'
+    | '/signup'
+    | '/sources'
+    | '/transactions/$id'
+    | '/transactions/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/receive' | '/send' | '/signup'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/notifications'
+    | '/profile'
+    | '/receive'
+    | '/scan'
+    | '/send'
+    | '/settings'
+    | '/signup'
+    | '/sources'
+    | '/transactions/$id'
+    | '/transactions'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
     | '/login'
+    | '/notifications'
+    | '/profile'
     | '/receive'
+    | '/scan'
     | '/send'
+    | '/settings'
     | '/signup'
+    | '/sources'
+    | '/transactions/$id'
+    | '/transactions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
+  NotificationsRoute: typeof NotificationsRoute
+  ProfileRoute: typeof ProfileRoute
   ReceiveRoute: typeof ReceiveRoute
+  ScanRoute: typeof ScanRoute
   SendRoute: typeof SendRoute
+  SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
+  SourcesRoute: typeof SourcesRoute
+  TransactionsIdRoute: typeof TransactionsIdRoute
+  TransactionsIndexRoute: typeof TransactionsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -119,11 +222,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/receive': {
       id: '/receive'
       path: '/receive'
       fullPath: '/receive'
       preLoaderRoute: typeof ReceiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scan': {
+      id: '/scan'
+      path: '/scan'
+      fullPath: '/scan'
+      preLoaderRoute: typeof ScanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/send': {
@@ -133,11 +257,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SendRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sources': {
+      id: '/sources'
+      path: '/sources'
+      fullPath: '/sources'
+      preLoaderRoute: typeof SourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transactions/': {
+      id: '/transactions/'
+      path: '/transactions'
+      fullPath: '/transactions/'
+      preLoaderRoute: typeof TransactionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transactions/$id': {
+      id: '/transactions/$id'
+      path: '/transactions/$id'
+      fullPath: '/transactions/$id'
+      preLoaderRoute: typeof TransactionsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -147,9 +299,16 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
+  NotificationsRoute: NotificationsRoute,
+  ProfileRoute: ProfileRoute,
   ReceiveRoute: ReceiveRoute,
+  ScanRoute: ScanRoute,
   SendRoute: SendRoute,
+  SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
+  SourcesRoute: SourcesRoute,
+  TransactionsIdRoute: TransactionsIdRoute,
+  TransactionsIndexRoute: TransactionsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
