@@ -17,7 +17,7 @@ export function StepTracker({
 }: {
   steps: readonly string[];
   current: number;
-  className?: string;
+  className?: string | undefined;
 }) {
   return (
     <ol className={cn("mb-6 flex items-center gap-2", className)} aria-label="Progress">
@@ -63,7 +63,7 @@ export function TextField({
   hint,
   className,
   ...props
-}: React.ComponentProps<typeof Input> & { id: string; label: string; error?: string; hint?: string }) {
+}: React.ComponentProps<typeof Input> & { id: string; label: string; error?: string | undefined; hint?: string | undefined }) {
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
     <div className="space-y-1.5">
@@ -100,12 +100,12 @@ export function AmountField({
 }: {
   value: string;
   onChange: (next: string) => void;
-  label?: string;
-  error?: string;
-  hint?: string;
+  label?: string | undefined;
+  error?: string | undefined;
+  hint?: string | undefined;
   quickAmounts?: readonly number[];
-  id?: string;
-  disabled?: boolean;
+  id?: string | undefined;
+  disabled?: boolean | undefined;
 }) {
   return (
     <div className="space-y-3">
@@ -207,9 +207,9 @@ export function SourceSelect({
 
 /* ------------------------------------------------------------- summaries */
 
-export type SummaryRow = { label: string; value: ReactNode; emphasis?: boolean };
+export type SummaryRow = { label: string; value: ReactNode; emphasis?: boolean | undefined };
 
-export function SummaryList({ rows, className }: { rows: readonly SummaryRow[]; className?: string }) {
+export function SummaryList({ rows, className }: { rows: readonly SummaryRow[]; className?: string | undefined }) {
   return (
     <dl className={cn("divide-y divide-border rounded-2xl border border-border bg-card px-4", className)}>
       {rows.map((row) => (
@@ -277,10 +277,10 @@ export function FailureState({
   retryLabel = "Try Again",
   secondaryAction,
 }: {
-  title?: string;
+  title?: string | undefined;
   description: string;
-  onRetry?: () => void;
-  retryLabel?: string;
+  onRetry?: (() => void) | undefined;
+  retryLabel?: string | undefined;
   secondaryAction?: ReactNode;
 }) {
   return (
@@ -324,7 +324,7 @@ export function SubmitButton({
   children,
   className,
   ...props
-}: React.ComponentProps<typeof GradientButton> & { loading?: boolean; loadingLabel?: string }) {
+}: React.ComponentProps<typeof GradientButton> & { loading?: boolean | undefined; loadingLabel?: string | undefined }) {
   return (
     <GradientButton {...props} disabled={loading || props.disabled} className={className}>
       {loading ? (
