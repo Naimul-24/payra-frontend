@@ -21,6 +21,7 @@ import { Route as SendRouteImport } from './routes/send'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SourcesRouteImport } from './routes/sources'
+import { Route as VerifyOtpRouteImport } from './routes/verify-otp'
 import { Route as TransactionsIndexRouteImport } from './routes/transactions.index'
 import { Route as TransactionsIdRouteImport } from './routes/transactions.$id'
 
@@ -84,6 +85,11 @@ const SourcesRoute = SourcesRouteImport.update({
   path: '/sources',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VerifyOtpRoute = VerifyOtpRouteImport.update({
+  id: '/verify-otp',
+  path: '/verify-otp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TransactionsIndexRoute = TransactionsIndexRouteImport.update({
   id: '/transactions/',
   path: '/transactions/',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/sources': typeof SourcesRoute
+  '/verify-otp': typeof VerifyOtpRoute
   '/transactions/$id': typeof TransactionsIdRoute
   '/transactions/': typeof TransactionsIndexRoute
 }
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/sources': typeof SourcesRoute
+  '/verify-otp': typeof VerifyOtpRoute
   '/transactions/$id': typeof TransactionsIdRoute
   '/transactions': typeof TransactionsIndexRoute
 }
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/sources': typeof SourcesRoute
+  '/verify-otp': typeof VerifyOtpRoute
   '/transactions/$id': typeof TransactionsIdRoute
   '/transactions/': typeof TransactionsIndexRoute
 }
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/signup'
     | '/sources'
+    | '/verify-otp'
     | '/transactions/$id'
     | '/transactions/'
   fileRoutesByTo: FileRoutesByTo
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/signup'
     | '/sources'
+    | '/verify-otp'
     | '/transactions/$id'
     | '/transactions'
   id:
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/signup'
     | '/sources'
+    | '/verify-otp'
     | '/transactions/$id'
     | '/transactions/'
   fileRoutesById: FileRoutesById
@@ -208,6 +220,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   SourcesRoute: typeof SourcesRoute
+  VerifyOtpRoute: typeof VerifyOtpRoute
   TransactionsIdRoute: typeof TransactionsIdRoute
   TransactionsIndexRoute: typeof TransactionsIndexRoute
 }
@@ -298,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SourcesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/verify-otp': {
+      id: '/verify-otp'
+      path: '/verify-otp'
+      fullPath: '/verify-otp'
+      preLoaderRoute: typeof VerifyOtpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/transactions/': {
       id: '/transactions/'
       path: '/transactions'
@@ -328,6 +348,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   SourcesRoute: SourcesRoute,
+  VerifyOtpRoute: VerifyOtpRoute,
   TransactionsIdRoute: TransactionsIdRoute,
   TransactionsIndexRoute: TransactionsIndexRoute,
 }
