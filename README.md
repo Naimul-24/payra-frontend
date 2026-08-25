@@ -1,4 +1,4 @@
-# Pixel Perfect
+# payra-frontend
 
 Implement exactly the screenshot and nothing else
 
