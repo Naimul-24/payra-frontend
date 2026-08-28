@@ -4,7 +4,7 @@ import { z } from "zod";
 import { AuthLayout, GoogleButton } from "@/components/payra/auth-layout";
 import { InlineFormError, SubmitButton, TextField } from "@/components/payra/flow-kit";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useSimulatedRequest } from "@/lib/use-simulated-request";
+import { supabase } from "@/lib/supabaseClient";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -64,28 +64,61 @@ function SignupPage() {
   });
   const [errors, setErrors] = useState<Partial<Record<FieldId | "terms", string>>>({});
   const [accepted, setAccepted] = useState(false);
-  const request = useSimulatedRequest(1600);
+  
 
-  function submit(event: React.FormEvent) {
+  async function submit(event: React.FormEvent) {
     event.preventDefault();
+
     const parsed = schema.safeParse(values);
     const next: Partial<Record<FieldId | "terms", string>> = {};
+
     if (!parsed.success) {
       for (const issue of parsed.error.issues) {
         const key = issue.path[0] as FieldId;
         if (key && !next[key]) next[key] = issue.message;
       }
     }
-    if (!accepted) next.terms = "Accept the Terms & Privacy Policy to continue.";
+
+    if (!accepted) {
+      next.terms = "Accept the Terms & Privacy Policy to continue.";
+    }
+
     setErrors(next);
+
     if (Object.keys(next).length > 0) return;
 
-    const fail = values.email.trim().toLowerCase().endsWith("@taken.com");
-    request.run({
-      fail,
-      failMessage: "An account already exists with that email. Try logging in instead.",
-      onSuccess: () => navigate({ to: "/verify-otp", search: { flow: "signup" } }),
-    });
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: values.email.trim().toLowerCase(),
+        password: values.password,
+        options: {
+          data: {
+            full_name: values.name.trim(),
+            phone: values.phone.trim(),
+          },
+        },
+      });
+
+      if (error) {
+        setErrors({
+          email: error.message,
+        });
+        return;
+      }
+
+      console.log("Supabase signup successful:", data.user);
+
+      navigate({
+        to: "/verify-otp",
+        search: { flow: "signup" },
+      });
+    } catch (error) {
+      console.error("Signup error:", error);
+
+      setErrors({
+        email: "Something went wrong. Please try again.",
+      });
+    }
   }
 
   return (
@@ -102,8 +135,6 @@ function SignupPage() {
       }
     >
       <form className="space-y-4" noValidate onSubmit={submit}>
-        {request.error ? <InlineFormError message={request.error} /> : null}
-
         {fields.map((field) => (
           <TextField
             key={field.id}
@@ -113,7 +144,7 @@ function SignupPage() {
             placeholder={field.placeholder}
             autoComplete={field.autoComplete}
             value={values[field.id]}
-            disabled={request.isLoading}
+            disabled={false}
             error={errors[field.id]}
             onChange={(event) => setValues((prev) => ({ ...prev, [field.id]: event.target.value }))}
           />
@@ -128,7 +159,8 @@ function SignupPage() {
               onCheckedChange={(checked) => setAccepted(checked === true)}
             />
             <span>
-              I agree to Payra&apos;s <span className="font-semibold text-primary">Terms &amp; Privacy Policy</span>
+              I agree to Payra&apos;s{" "}
+              <span className="font-semibold text-primary">Terms &amp; Privacy Policy</span>
             </span>
           </label>
           {errors.terms ? (
@@ -138,7 +170,12 @@ function SignupPage() {
           ) : null}
         </div>
 
-        <SubmitButton type="submit" className="w-full" loading={request.isLoading} loadingLabel="Creating account…">
+        <SubmitButton
+          type="submit"
+          className="w-full"
+          loading={false}
+          loadingLabel="Creating account…"
+        >
           Create Payra Account
         </SubmitButton>
 

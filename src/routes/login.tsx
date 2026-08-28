@@ -5,7 +5,7 @@ import { z } from "zod";
 import { AuthLayout, GoogleButton } from "@/components/payra/auth-layout";
 import { InlineFormError, SubmitButton, TextField } from "@/components/payra/flow-kit";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useSimulatedRequest } from "@/lib/use-simulated-request";
+import { supabase } from "@/lib/supabaseClient";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -41,31 +41,58 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Errors>({});
   const [twoStep, setTwoStep] = useState(false);
-  const request = useSimulatedRequest(1400);
+  const [submitError, setSubmitError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  
 
-  function submit(event: React.FormEvent) {
+  async function submit(event: React.FormEvent) {
     event.preventDefault();
+
     const parsed = schema.safeParse({ identifier, password });
+
     if (!parsed.success) {
       const next: Errors = {};
+
       for (const issue of parsed.error.issues) {
         const key = issue.path[0] as keyof Errors;
-        if (key && !next[key]) next[key] = issue.message;
+
+        if (key && !next[key]) {
+          next[key] = issue.message;
+        }
       }
+
       setErrors(next);
       return;
     }
+
     setErrors({});
-    // Prototype credential check: the wrong password reaches the error state.
-    const fail = parsed.data.password !== "payra1234";
-    request.run({
-      fail,
-      failMessage: "Those credentials don't match an account. Prototype password: payra1234",
-      onSuccess: () => {
-        if (twoStep) navigate({ to: "/verify-otp", search: { flow: "login" } });
-        else navigate({ to: "/dashboard" });
-      },
+    setSubmitError("");
+    setIsLoading(true);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: parsed.data.identifier.trim().toLowerCase(),
+      password: parsed.data.password,
     });
+
+    setIsLoading(false);
+
+    if (error) {
+      setSubmitError(error.message);
+      return;
+    }
+
+    console.log("Logged in user:", data.user);
+
+    if (twoStep) {
+      navigate({
+        to: "/verify-otp",
+        search: { flow: "login" },
+      });
+    } else {
+      navigate({
+        to: "/dashboard",
+      });
+    }
   }
 
   return (
@@ -82,7 +109,7 @@ function LoginPage() {
       }
     >
       <form className="space-y-4" noValidate onSubmit={submit}>
-        {request.error ? <InlineFormError message={request.error} /> : null}
+        {submitError ? <InlineFormError message={submitError} /> : null}
 
         <TextField
           id="identifier"
@@ -90,7 +117,7 @@ function LoginPage() {
           placeholder="naimul@payra.app"
           autoComplete="username"
           value={identifier}
-          disabled={request.isLoading}
+          disabled={isLoading}
           error={errors.identifier}
           onChange={(event) => setIdentifier(event.target.value)}
         />
@@ -101,7 +128,7 @@ function LoginPage() {
           placeholder="••••••••"
           autoComplete="current-password"
           value={password}
-          disabled={request.isLoading}
+          disabled={isLoading}
           error={errors.password}
           hint="Prototype password: payra1234"
           onChange={(event) => setPassword(event.target.value)}
@@ -116,12 +143,20 @@ function LoginPage() {
             />{" "}
             Ask for a 2-step code
           </label>
-          <Link to="/forgot-password" className="text-sm font-semibold text-primary hover:underline">
+          <Link
+            to="/forgot-password"
+            className="text-sm font-semibold text-primary hover:underline"
+          >
             Forgot password?
           </Link>
         </div>
 
-        <SubmitButton type="submit" className="w-full" loading={request.isLoading} loadingLabel="Logging in…">
+        <SubmitButton
+          type="submit"
+          className="w-full"
+          loading={isLoading}
+          loadingLabel="Logging in…"
+        >
           Log In
         </SubmitButton>
 
@@ -134,7 +169,7 @@ function LoginPage() {
 
         <button
           type="button"
-          disabled={request.isLoading}
+          disabled={isLoading}
           className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent disabled:opacity-60"
         >
           <Fingerprint className="size-4.5" aria-hidden /> Use Face ID / Fingerprint

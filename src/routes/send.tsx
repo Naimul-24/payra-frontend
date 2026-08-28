@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Check, Fingerprint, Search } from "lucide-react";
 import { AppShell } from "@/components/payra/app-shell";
@@ -13,20 +13,19 @@ import {
 } from "@/components/payra/ui-kit";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { balances, contacts, formatBDT, paymentSources } from "@/lib/payra-data";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { formatBDT, paymentSources } from "@/lib/payra-data";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabaseClient";
 
 export const Route = createFileRoute("/send")({
   head: () => ({
     meta: [
       { title: "Send Money — Payra" },
-      { name: "description", content: "Send money to any phone number, Payra ID or saved contact." },
+      {
+        name: "description",
+        content: "Send money to any phone number, Payra ID or saved contact.",
+      },
       { property: "og:title", content: "Send Money — Payra" },
       { property: "og:description", content: "Send money in a few taps with Payra." },
     ],
@@ -39,10 +38,63 @@ const categories = ["Transfer", "Bills", "Food & Drink", "Shopping", "Family"];
 const steps = ["Recipient", "Amount", "Review"];
 
 function SendPage() {
+    const [profiles, setProfiles] = useState<
+    { id: string; full_name: string; phone: string | null; avatar_url: string | null }[]
+  >([]);
+    const [balance, setBalance] = useState(0);
+    const [currentUserId, setCurrentUserId] = useState("");
+    const [sendError, setSendError] = useState("");
+    const [sending, setSending] = useState(false);
+      useEffect(() => {
+        async function loadWallet() {
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+
+          if (!user) {
+            return;
+          }
+
+          setCurrentUserId(user.id);
+
+          const { data, error } = await supabase
+            .from("wallets")
+            .select("balance")
+            .eq("user_id", user.id)
+            .eq("currency", "BDT")
+            .single();
+
+          if (error) {
+            console.error("Wallet error:", error);
+            return;
+          }
+
+          setBalance(Number(data.balance) || 0);
+        }
+
+        loadWallet();
+        useEffect(() => {
+          async function loadProfiles() {
+            const { data, error } = await supabase
+              .from("profiles")
+              .select("id, full_name, phone, avatar_url")
+              .limit(50);
+
+            if (error) {
+              console.error("Profiles error:", error);
+              return;
+            }
+
+            setProfiles(data ?? []);
+          }
+
+          loadProfiles();
+        }, []);
+      }, []);
   const [step, setStep] = useState(0);
   const [method, setMethod] = useState(methods[3]);
   const [query, setQuery] = useState("");
-  const [recipientId, setRecipientId] = useState(contacts[0]?.id ?? "");
+  const [recipientId, setRecipientId] = useState("");
   const [amount, setAmount] = useState("2500");
   const [note, setNote] = useState("");
   const [category, setCategory] = useState(categories[0]);
@@ -50,21 +102,29 @@ function SendPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [done, setDone] = useState(false);
 
-  const recipient = contacts.find((c) => c.id === recipientId) ?? contacts[0];
+  const recipient = profiles.find((p) => p.id === recipientId);
   const source = paymentSources.find((s) => s.id === sourceId) ?? paymentSources[0];
   const value = Number(amount) || 0;
   const fee = value > 2000 ? 5 : 0;
 
   if (!recipient || !source) {
-    return null;
+    return (
+      <AppShell title="Send Money" subtitle="Three quick steps and the money is on its way.">
+        <div className="mx-auto max-w-2xl">
+          <SurfaceCard className="p-6">
+            <p className="text-center text-sm text-muted-foreground">Loading recipients...</p>
+          </SurfaceCard>
+        </div>
+      </AppShell>
+    );
   }
 
   const filtered = useMemo(
     () =>
-      contacts.filter((c) =>
-        `${c.name} ${c.handle} ${c.phone}`.toLowerCase().includes(query.toLowerCase()),
+      profiles.filter((p) =>
+        `${p.full_name} ${p.phone ?? ""}`.toLowerCase().includes(query.toLowerCase()),
       ),
-    [query],
+    [profiles, query],
   );
 
   return (
@@ -77,9 +137,7 @@ function SendPage() {
               <span
                 className={cn(
                   "inline-flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold",
-                  i <= step
-                    ? "bg-brand text-primary-foreground"
-                    : "bg-muted text-muted-foreground",
+                  i <= step ? "bg-brand text-primary-foreground" : "bg-muted text-muted-foreground",
                 )}
               >
                 {i < step ? <Check className="size-4" /> : i + 1}
@@ -119,7 +177,10 @@ function SendPage() {
               </div>
 
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+                <Search
+                  className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden
+                />
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -132,28 +193,33 @@ function SendPage() {
               <div>
                 <SectionHeading title="Recent recipients" />
                 <div className="space-y-2">
-                  {filtered.map((c) => (
+                  {filtered.map((p) => (
                     <button
-                      key={c.id}
+                      key={p.id}
                       type="button"
-                      onClick={() => setRecipientId(c.id)}
+                      onClick={() => setRecipientId(p.id)}
                       className={cn(
                         "flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors",
-                        recipientId === c.id
+                        recipientId === p.id
                           ? "border-primary bg-accent/60"
                           : "border-border hover:bg-muted",
                       )}
                     >
-                      <UserAvatar initials={c.name.split(" ").map((n) => n[0]).join("")} />
+                      <UserAvatar
+                        initials={p.full_name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-semibold text-foreground">
-                          {c.name}
+                          {p.full_name}
                         </span>
                         <span className="block truncate text-xs text-muted-foreground">
-                          {c.handle} · {c.phone}
+                          {p.phone}
                         </span>
                       </span>
-                      {recipientId === c.id ? <Check className="size-4 text-primary" /> : null}
+                      {recipientId === p.id ? <Check className="size-4 text-primary" /> : null}
                     </button>
                   ))}
                 </div>
@@ -183,7 +249,7 @@ function SendPage() {
                   />
                 </div>
                 <p className="mt-3 text-xs text-muted-foreground">
-                  Available balance {formatBDT(balances.available)}
+                  Available balance {formatBDT(balance)}
                 </p>
               </div>
 
@@ -247,10 +313,15 @@ function SendPage() {
           {step === 2 ? (
             <div className="space-y-5">
               <div className="flex items-center gap-3 rounded-2xl bg-muted p-4">
-                <UserAvatar initials={recipient.name.split(" ").map((n) => n[0]).join("")} />
+                <UserAvatar
+                  initials={recipient.full_name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                />
                 <div>
-                  <p className="text-sm font-semibold text-foreground">{recipient.name}</p>
-                  <p className="text-xs text-muted-foreground">{recipient.handle}</p>
+                  <p className="text-sm font-semibold text-foreground">{recipient.full_name}</p>
+                  <p className="text-xs text-muted-foreground">{recipient.phone}</p>
                 </div>
               </div>
 
@@ -301,12 +372,16 @@ function SendPage() {
           <DialogHeader>
             <DialogTitle>{done ? "Transfer complete" : "Confirm payment"}</DialogTitle>
           </DialogHeader>
-
+          {sendError ? (
+            <div className="mb-4 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
+              {sendError}
+            </div>
+          ) : null}
           {done ? (
             <div className="space-y-6 py-2">
               <SuccessState
                 title={`${formatBDT(value)} sent`}
-                description={`${recipient.name} will receive it instantly.`}
+                description={`${recipient.full_name} will receive it instantly.`}
               />
               <div className="flex gap-3">
                 <Link to="/transactions" className="flex-1">
@@ -320,8 +395,9 @@ function SendPage() {
           ) : (
             <div className="space-y-5 py-2 text-center">
               <p className="text-sm text-muted-foreground">
-                Sending <span className="font-bold text-foreground">{formatBDT(value + fee)}</span> to{" "}
-                <span className="font-bold text-foreground">{recipient.name}</span> from {source.name}.
+                Sending <span className="font-bold text-foreground">{formatBDT(value + fee)}</span>{" "}
+                to <span className="font-bold text-foreground">{recipient.full_name}</span> from{" "}
+                {source.name}.
               </p>
               <span className="mx-auto inline-flex size-16 items-center justify-center rounded-full bg-accent">
                 <Fingerprint className="size-8 text-accent-foreground" aria-hidden />
@@ -329,8 +405,57 @@ function SendPage() {
               <p className="text-xs text-muted-foreground">
                 Confirm with your PIN or biometrics (demo placeholder).
               </p>
-              <GradientButton className="w-full" onClick={() => setDone(true)}>
-                Authorise payment
+              <GradientButton
+                className="w-full"
+                disabled={sending}
+                onClick={async () => {
+                  setSending(true);
+                  setSendError("");
+
+                  try {
+                    if (!currentUserId) {
+                      setSendError("Please log in again.");
+                      return;
+                    }
+
+                    if (!recipientId) {
+                      setSendError("Please select a recipient.");
+                      return;
+                    }
+
+                    if (value <= 0) {
+                      setSendError("Enter a valid amount.");
+                      return;
+                    }
+
+                    if (value > balance) {
+                      setSendError("Insufficient balance.");
+                      return;
+                    }
+
+                    const { data, error } = await supabase.rpc("send_money", {
+                      p_receiver_user_id: recipientId,
+                      p_amount: value,
+                      p_description: note || null,
+                    });
+
+                    if (error) {
+                      console.error("Send money error:", error);
+                      setSendError(error.message);
+                      return;
+                    }
+
+                    console.log("Transfer successful:", data);
+                    setDone(true);
+                  } catch (error) {
+                    console.error("Transfer error:", error);
+                    setSendError("Something went wrong. Please try again.");
+                  } finally {
+                    setSending(false);
+                  }
+                }}
+              >
+                {sending ? "Sending..." : "Authorise payment"}
               </GradientButton>
             </div>
           )}

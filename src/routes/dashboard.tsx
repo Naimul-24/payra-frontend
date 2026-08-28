@@ -1,21 +1,28 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowDownLeft, ArrowUpRight, HandCoins, Plus, QrCode, Send } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  ArrowRight,
+  ArrowDownLeft,
+  ArrowUpRight,
+  HandCoins,
+  Plus,
+  QrCode,
+  Send,
+} from "lucide-react";
 import { AppShell } from "@/components/payra/app-shell";
 import { BalanceCard, PaymentSourceCard, TransactionCard } from "@/components/payra/cards";
 import { SectionHeading, SurfaceCard, TrustBadges } from "@/components/payra/ui-kit";
-import {
-  balances,
-  currentUser,
-  formatBDT,
-  paymentSources,
-  transactions,
-} from "@/lib/payra-data";
+import { formatBDT, paymentSources, transactions } from "@/lib/payra-data";
+import { supabase } from "@/lib/supabaseClient";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — Payra" },
-      { name: "description", content: "Your Payra balance, quick actions and recent transactions." },
+      {
+        name: "description",
+        content: "Your Payra balance, quick actions and recent transactions.",
+      },
       { property: "og:title", content: "Dashboard — Payra" },
       { property: "og:description", content: "Your balance, quick actions and recent activity." },
     ],
@@ -33,6 +40,48 @@ const quickActions = [
 ] as const;
 
 function Dashboard() {
+    const navigate = useNavigate();
+
+    const [userName, setUserName] = useState("there");
+    const [balance, setBalance] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+      useEffect(() => {
+        async function loadWallet() {
+          setLoading(true);
+          setError("");
+
+          const {
+            data: { user },
+            error: userError,
+          } = await supabase.auth.getUser();
+
+          if (userError || !user) {
+            navigate({ to: "/login" });
+            return;
+          }
+
+          setUserName(user.user_metadata?.['full_name'] || user.email?.split("@")[0] || "there");
+
+          const { data: wallet, error: walletError } = await supabase
+            .from("wallets")
+            .select("balance")
+            .eq("user_id", user.id)
+            .eq("currency", "BDT")
+            .single();
+
+          if (walletError) {
+            console.error(walletError);
+            setError("Unable to load your wallet.");
+          } else {
+            setBalance(Number(wallet.balance) || 0);
+          }
+
+          setLoading(false);
+        }
+
+        loadWallet();
+      }, [navigate]);
   const recent = transactions.slice(0, 5);
   const spent = transactions
     .filter((t) => t.amount < 0 && t.status === "completed")
@@ -43,16 +92,21 @@ function Dashboard() {
 
   return (
     <AppShell
-      title={`Good afternoon, ${currentUser.firstName} 👋`}
+      title={`Good afternoon, ${userName} 👋`}
       subtitle="Here's how your money is moving today."
     >
+      {error ? (
+        <div className="mb-6 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {error}
+        </div>
+      ) : null}
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <BalanceCard
-            total={balances.total}
-            available={balances.available}
-            pending={balances.pending}
-            last4={currentUser.cardLast4}
+            total={loading ? 0 : balance}
+            available={loading ? 0 : balance}
+            pending={0}
+            last4="0000"
           />
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
