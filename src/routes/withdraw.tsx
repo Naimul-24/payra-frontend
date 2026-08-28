@@ -4,7 +4,8 @@ import { ArrowLeft, ArrowRight, Info } from "lucide-react";
 import { AppShell } from "@/components/payra/app-shell";
 import { SectionHeading, SoftButton, SuccessState, SurfaceCard, TrustBadges } from "@/components/payra/ui-kit";
 import { AmountField, FailureState, FlowActions, InlineFormError, ProcessingState, ReferenceRow, SourceSelect, StepTracker, SubmitButton, SummaryList } from "@/components/payra/flow-kit";
-import { formatBDT, getCurrentWallet, getMyPaymentMethods } from "@/lib/supabase-data";
+import { formatBDT } from "@/lib/payra-data";
+import { getCurrentWallet, getMyPaymentMethods } from "@/lib/supabase-data";
 import { withdrawMoney } from "@/lib/withdraw-backend";
 
 export const Route = createFileRoute("/withdraw")({ head:()=>({meta:[{title:"Withdraw Money — Payra"},{name:"description",content:"Cash out from your Payra wallet to a linked destination."}] }), component:WithdrawPage });
