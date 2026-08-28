@@ -1,0 +1,112 @@
+import { supabase } from "./supabaseClient";
+
+export type DbTransaction = {
+  id: string;
+  sender_wallet_id: string | null;
+  receiver_wallet_id: string | null;
+  amount: number | string;
+  currency: string;
+  type: string;
+  status: string;
+  description: string | null;
+  reference: string | null;
+  created_at: string;
+};
+
+export type DbPaymentMethod = {
+  id: string;
+  method_type: string;
+  provider: string;
+  account_label: string | null;
+  last4: string | null;
+  is_default: boolean;
+  created_at: string;
+};
+
+export async function getCurrentUser() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) throw error;
+  return data.user;
+}
+
+export async function getCurrentProfile() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, full_name, phone, avatar_url, created_at, updated_at")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function getCurrentWallet() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+  const { data, error } = await supabase
+    .from("wallets")
+    .select("id, user_id, currency, balance, created_at, updated_at")
+    .eq("user_id", user.id)
+    .eq("currency", "BDT")
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function getMyTransactions(limit = 50) {
+  const wallet = await getCurrentWallet();
+  if (!wallet) return [] as DbTransaction[];
+
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("id, sender_wallet_id, receiver_wallet_id, amount, currency, type, status, description, reference, created_at")
+    .or(`sender_wallet_id.eq.${wallet.id},receiver_wallet_id.eq.${wallet.id}`)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []) as DbTransaction[];
+}
+
+export async function getMyPaymentMethods() {
+  const user = await getCurrentUser();
+  if (!user) return [] as DbPaymentMethod[];
+  const { data, error } = await supabase
+    .from("payment_methods")
+    .select("id, method_type, provider, account_label, last4, is_default, created_at")
+    .eq("user_id", user.id)
+    .order("is_default", { ascending: false })
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as DbPaymentMethod[];
+}
+
+export async function getMyNotifications() {
+  const user = await getCurrentUser();
+  if (!user) return [];
+  const { data, error } = await supabase
+    .from("notifications")
+    .select("id, title, message, is_read, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function markNotificationRead(id: string) {
+  const { error } = await supabase.from("notifications").update({ is_read: true }).eq("id", id);
+  if (error) throw error;
+}
+
+export function transactionAmount(tx: DbTransaction, walletId: string) {
+  const amount = Number(tx.amount);
+  return tx.receiver_wallet_id === walletId ? amount : -amount;
+}
+
+export function transactionKind(tx: DbTransaction, walletId: string) {
+  if (tx.receiver_wallet_id === walletId) return "received" as const;
+  if (tx.type === "withdrawal") return "withdrawal" as const;
+  if (tx.type === "add-money" || tx.type === "topup") return "add-money" as const;
+  if (tx.type === "payment") return "payment" as const;
+  return "sent" as const;
+}
