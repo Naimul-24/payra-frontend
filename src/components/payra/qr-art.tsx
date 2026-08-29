@@ -28,9 +28,6 @@ export function QrCodeArt({ className, value }: { className?: string; value?: st
           QR code unavailable
         </div>
       )}
-      <span className="absolute grid size-11 place-items-center rounded-xl bg-brand text-sm font-extrabold text-primary-foreground shadow-soft">
-        P
-      </span>
     </div>
   );
 }
