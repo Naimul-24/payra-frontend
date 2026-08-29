@@ -5,7 +5,8 @@ import { AppShell } from "@/components/payra/app-shell";
 import { BalanceCard, PaymentSourceCard, TransactionCard } from "@/components/payra/cards";
 import { SectionHeading, SurfaceCard, TrustBadges } from "@/components/payra/ui-kit";
 import { formatBDT, type PaymentSource, type Transaction } from "@/lib/payra-data";
-import { getCurrentProfile, getCurrentWallet, getMyPaymentMethods, getMyTransactions, supabase, transactionAmount, transactionKind } from "@/lib/supabase-data";
+import { getCurrentProfile, getCurrentWallet, getMyPaymentMethods, getMyTransactions, transactionAmount, transactionKind } from "@/lib/supabase-data";
+import { supabase } from "@/lib/supabaseClient";
 
 export const Route = createFileRoute("/dashboard")({ head: () => ({ meta: [
   { title: "Dashboard — Payra" }, { name: "description", content: "Your Payra balance, quick actions and recent transactions." },
