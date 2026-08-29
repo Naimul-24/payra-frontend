@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Plus } from "lucide-react";
 import { AppShell } from "@/components/payra/app-shell";
 import { SectionHeading, SoftButton, SuccessState, SurfaceCard, TrustBadges } from "@/components/payra/ui-kit";
 import { AmountField, FlowActions, InlineFormError, ProcessingState, ReferenceRow, SourceSelect, StepTracker, SubmitButton, SummaryList } from "@/components/payra/flow-kit";
-import { addMoney, getCurrentWallet, getMyPaymentMethods, type DbPaymentMethod } from "@/lib/supabase-data";
+import { completeMockProviderPayment, getCurrentWallet, getMyPaymentMethods, initiateProviderPayment, type DbPaymentMethod, type DbProviderPayment } from "@/lib/supabase-data";
 
 export const Route = createFileRoute("/add-money")({
   head: () => ({ meta: [
@@ -32,7 +32,7 @@ function AddMoneyPage() {
   const [amountError, setAmountError] = useState<string>();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<Awaited<ReturnType<typeof addMoney>> | null>(null);
+  const [result, setResult] = useState<DbProviderPayment | null>(null);\n  const [providerPayment, setProviderPayment] = useState<DbProviderPayment | null>(null);
 
   useEffect(() => {
     Promise.all([getMyPaymentMethods(), getCurrentWallet()])
@@ -66,54 +66,14 @@ function AddMoneyPage() {
   async function confirm() {
     if (!sourceId || !validateAmount()) return;
     setProcessing(true); setError("");
-    try {
-      const tx = await addMoney(numeric, sourceId);
-      const wallet = await getCurrentWallet();
-      setWalletBalance(Number(wallet?.balance) || walletBalance + numeric);
-      setResult(tx); setStep(2);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "The top-up failed.");
-    } finally { setProcessing(false); }
+    try { const payment = await initiateProviderPayment(sourceId, numeric, "add_money"); setProviderPayment(payment); setStep(3); }
+    catch (e) { setError(e instanceof Error ? e.message : "Unable to start provider payment."); }
+    finally { setProcessing(false); }
   }
-
-  if (loading) return <Shell><ProcessingState title="Loading payment methods" description="Checking your connected sources." /></Shell>;
-  if (processing) return <Shell><ProcessingState title="Adding money" description={`Recording ${formatBDT(numeric)} in your Payra wallet.`} /></Shell>;
-
-  if (result) return <Shell>
-    <SuccessState title="Money added" description={`${formatBDT(numeric)} was added to your Payra wallet.`} />
-    <SummaryList className="mt-6" rows={[
-      { label: "From", value: source?.name ?? "Payment method" },
-      { label: "Amount", value: formatBDT(numeric) },
-      { label: "New balance", value: formatBDT(walletBalance), emphasis: true },
-    ]} />
-    <ReferenceRow reference={result.reference ?? result.id} />
-    <FlowActions>
-      <Link to="/transactions"><SoftButton className="w-full sm:w-auto">View transactions</SoftButton></Link>
-      <Link to="/dashboard"><SubmitButton className="w-full sm:w-auto">Back to dashboard</SubmitButton></Link>
-    </FlowActions>
-  </Shell>;
-
-  return <Shell>
-    <StepTracker steps={steps} current={step} />
-    {error ? <InlineFormError message={error} /> : null}
-    {step === 0 ? <div className="space-y-5">
-      <SectionHeading title="Choose a funding source" description="Select a payment method already connected to your Payra account." />
-      {sources.length ? <SourceSelect sources={sources} value={sourceId} onChange={setSourceId} label="Funding source" name="add-money-source" /> : <InlineFormError message="No payment method is connected yet." />}
-      <Link to="/sources/connect/$kind" params={{ kind: "bank" }} className="block"><SoftButton className="w-full"><Plus className="size-4" /> Connect a new source</SoftButton></Link>
-      <FlowActions><SubmitButton disabled={!source} onClick={() => setStep(1)}>Continue <ArrowRight className="size-4" /></SubmitButton></FlowActions>
-    </div> : null}
-    {step === 1 ? <form className="space-y-5" noValidate onSubmit={(e) => { e.preventDefault(); if (validateAmount()) setStep(2); }}>
-      <SectionHeading title="How much do you want to add?" description={`From ${source?.name ?? "your payment method"}`} />
-      <AmountField id="add-amount" value={amount} onChange={setAmount} error={amountError} hint={`Between ${formatBDT(MIN_AMOUNT)} and ${formatBDT(MAX_AMOUNT)}.`} />
-      <FlowActions><SoftButton onClick={() => setStep(0)}><ArrowLeft className="size-4" /> Back</SoftButton><SubmitButton type="submit">Review <ArrowRight className="size-4" /></SubmitButton></FlowActions>
-    </form> : null}
-    {step === 2 ? <div className="space-y-5">
-      <SectionHeading title="Review top-up" description="Confirm the amount and connected payment method." />
-      <SummaryList rows={[{ label: "From", value: source?.name ?? "—" }, { label: "To", value: "Payra Wallet" }, { label: "Amount", value: formatBDT(numeric) }, { label: "New balance", value: formatBDT(walletBalance + numeric), emphasis: true }]} />
-      <TrustBadges />
-      <FlowActions><SoftButton onClick={() => setStep(1)}><ArrowLeft className="size-4" /> Back</SoftButton><SubmitButton onClick={confirm}>Add {formatBDT(numeric)}</SubmitButton></FlowActions>
-    </div> : null}
-  </Shell>;
-}
-
-function Shell({ children }: { children: React.ReactNode }) { return <AppShell title="Add Money" subtitle="Top up your Payra wallet using a connected payment method."><SurfaceCard className="mx-auto max-w-2xl p-6 sm:p-7">{children}</SurfaceCard></AppShell>; }
+  async function approveMockPayment() {
+    if (!providerPayment) return;
+    setProcessing(true); setError("");
+    try { const completed = await completeMockProviderPayment(providerPayment.id, true); const wallet = await getCurrentWallet(); setWalletBalance(Number(wallet?.balance) || walletBalance + numeric); setResult(completed); }
+    catch (e) { setError(e instanceof Error ? e.message : "Provider payment could not be completed."); }
+    finally { setProcessing(false); }
+  }
