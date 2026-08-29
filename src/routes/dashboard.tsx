@@ -25,7 +25,8 @@ function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [paymentSources, setPaymentSources] = useState<PaymentSource[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");\n  const [welcomeBonus, setWelcomeBonus] = useState(false);
+  const [error, setError] = useState("");
+  const [welcomeBonus, setWelcomeBonus] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -33,7 +34,9 @@ function Dashboard() {
         const [profile, wallet, dbMethods] = await Promise.all([getCurrentProfile(), getCurrentWallet(), getMyPaymentMethods()]);
         if (!profile || !wallet) { navigate({ to: "/login" }); return; }
         setUserName(profile.full_name?.split(" ")[0] || "there");
-        setBalance(Number(wallet.balance) || 0);\n        const { data: bonus } = await supabase.from("signup_bonuses").select("user_id").eq("user_id", profile.id).maybeSingle();\n        setWelcomeBonus(Boolean(bonus));
+        setBalance(Number(wallet.balance) || 0);
+        const { data: bonus } = await supabase.from("signup_bonuses").select("user_id").eq("user_id", profile.id).maybeSingle();
+        setWelcomeBonus(Boolean(bonus));
         const dbTx = await getMyTransactions(5);
         setTransactions(dbTx.map((tx) => ({ id: tx.id, kind: transactionKind(tx, wallet.id), counterparty: "Payra user", description: tx.description || tx.type, amount: transactionAmount(tx, wallet.id), date: tx.created_at, source: "Payra Wallet", status: tx.status as Transaction["status"], fee: 0, category: tx.type })));
         setPaymentSources(dbMethods.map((m) => ({ id: m.id, name: m.provider, detail: m.account_label || (m.last4 ? `•••• ${m.last4}` : m.method_type), kind: (m.method_type === "bank" ? "bank" : m.method_type === "card" ? "card" : "mfs") as PaymentSource["kind"], status: "connected" as const })));
@@ -48,6 +51,7 @@ function Dashboard() {
 
   return <AppShell title={`Good afternoon, ${userName} 👋`} subtitle="Here's how your money is moving today.">
     {error ? <div className="mb-6 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</div> : null}
+    {welcomeBonus ? <div className="mb-6 rounded-3xl border border-primary/20 bg-primary/5 p-5 shadow-soft"><div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-lg font-bold text-foreground">🎉 You received ৳1,000 to explore Payra</p><p className="mt-1 text-sm text-muted-foreground">Use your welcome bonus to try Send Money, Receive Money and QR Scan payments with real Payra wallet transactions.</p></div><div className="flex flex-wrap gap-2"><Link to="/send" className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Try Send</Link><Link to="/scan" className="rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground">Try QR</Link></div></div></div> : null}
     <div className="grid gap-6 lg:grid-cols-3"><div className="space-y-6 lg:col-span-2">
       <BalanceCard total={loading ? 0 : balance} available={loading ? 0 : balance} pending={0} last4="0000" />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">{quickActions.map(({ to, label, icon: Icon }) => <Link key={to + label} to={to} className="flex flex-col items-center gap-2.5 rounded-3xl border border-border/70 bg-card p-5 text-center shadow-soft transition-all hover:-translate-y-1 hover:shadow-card"><span className="inline-flex size-12 items-center justify-center rounded-2xl bg-accent text-accent-foreground"><Icon className="size-5" /></span><span className="text-sm font-semibold text-foreground">{label}</span></Link>)}</div>
