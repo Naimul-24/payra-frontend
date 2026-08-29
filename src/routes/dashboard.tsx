@@ -5,7 +5,7 @@ import { AppShell } from "@/components/payra/app-shell";
 import { BalanceCard, PaymentSourceCard, TransactionCard } from "@/components/payra/cards";
 import { SectionHeading, SurfaceCard, TrustBadges } from "@/components/payra/ui-kit";
 import { formatBDT, type PaymentSource, type Transaction } from "@/lib/payra-data";
-import { getCurrentProfile, getCurrentWallet, getMyPaymentMethods, getMyTransactions, transactionAmount, transactionKind } from "@/lib/supabase-data";
+import { getCurrentProfile, getCurrentWallet, getMyPaymentMethods, getMyTransactions, supabase, transactionAmount, transactionKind } from "@/lib/supabase-data";
 
 export const Route = createFileRoute("/dashboard")({ head: () => ({ meta: [
   { title: "Dashboard — Payra" }, { name: "description", content: "Your Payra balance, quick actions and recent transactions." },
@@ -25,7 +25,7 @@ function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [paymentSources, setPaymentSources] = useState<PaymentSource[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState("");\n  const [welcomeBonus, setWelcomeBonus] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -33,7 +33,7 @@ function Dashboard() {
         const [profile, wallet, dbMethods] = await Promise.all([getCurrentProfile(), getCurrentWallet(), getMyPaymentMethods()]);
         if (!profile || !wallet) { navigate({ to: "/login" }); return; }
         setUserName(profile.full_name?.split(" ")[0] || "there");
-        setBalance(Number(wallet.balance) || 0);
+        setBalance(Number(wallet.balance) || 0);\n        const { data: bonus } = await supabase.from("signup_bonuses").select("user_id").eq("user_id", profile.id).maybeSingle();\n        setWelcomeBonus(Boolean(bonus));
         const dbTx = await getMyTransactions(5);
         setTransactions(dbTx.map((tx) => ({ id: tx.id, kind: transactionKind(tx, wallet.id), counterparty: "Payra user", description: tx.description || tx.type, amount: transactionAmount(tx, wallet.id), date: tx.created_at, source: "Payra Wallet", status: tx.status as Transaction["status"], fee: 0, category: tx.type })));
         setPaymentSources(dbMethods.map((m) => ({ id: m.id, name: m.provider, detail: m.account_label || (m.last4 ? `•••• ${m.last4}` : m.method_type), kind: (m.method_type === "bank" ? "bank" : m.method_type === "card" ? "card" : "mfs") as PaymentSource["kind"], status: "connected" as const })));
