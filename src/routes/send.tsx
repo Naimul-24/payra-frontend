@@ -88,10 +88,10 @@ function SendPage() {
     setSending(true);
     setSendError("");
     try {
-      if (!recipient?.phone) throw new Error("This recipient does not have a phone number.");
+      if (!recipient) throw new Error("Select a recipient first.");
       if (value <= 0) throw new Error("Enter a valid amount.");
       if (value > balance) throw new Error("Insufficient wallet balance.");
-      await sendMoney(recipient.phone, value, note || `${category} transfer`);
+      await sendMoney(recipient.id, value, note || `${category} transfer`);
       const wallet = await getCurrentWallet();
       setBalance(Number(wallet?.balance) || Math.max(0, balance - value));
       setDone(true);
@@ -124,7 +124,7 @@ function SendPage() {
             <div className="space-y-5">
               <div className="flex flex-wrap gap-2">{methods.map((m) => <button key={m} type="button" onClick={() => setMethod(m)} className={cn("rounded-xl border px-3.5 py-2 text-sm font-semibold", method === m ? "border-primary bg-accent text-accent-foreground" : "border-border text-muted-foreground hover:bg-muted")}>{m}</button>)}</div>
               <div className="relative"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by name or phone" aria-label="Search recipient" className="h-12 rounded-xl pl-9" /></div>
-              <div><SectionHeading title="Payra users" /><div className="space-y-2">{filtered.length ? filtered.map((p) => <button key={p.id} type="button" onClick={() => setRecipientId(p.id)} className={cn("flex w-full items-center gap-3 rounded-2xl border p-3 text-left", recipientId === p.id ? "border-primary bg-accent/60" : "border-border hover:bg-muted")}><UserAvatar initials={p.full_name.split(" ").map((n) => n[0]).join("")} /><span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{p.full_name}</span><span className="block truncate text-xs text-muted-foreground">{p.phone ?? "No phone number"}</span></span>{recipientId === p.id ? <Check className="size-4 text-primary" /> : null}</button>) : <p className="py-6 text-center text-sm text-muted-foreground">No Payra users found.</p>}</div></div>
+              <div><SectionHeading title="Payra users" /><div className="space-y-2">{filtered.length ? filtered.map((p) => <button key={p.id} type="button" onClick={() => setRecipientId(p.id)} className={cn("flex w-full items-center gap-3 rounded-2xl border p-3 text-left", recipientId === p.id ? "border-primary bg-accent/60" : "border-border hover:bg-muted")}><UserAvatar initials={p.full_name.split(" ").map((n) => n[0]).join("")} /><span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{p.full_name}</span><span className="block truncate text-xs text-muted-foreground">{p.phone ?? "Payra account"}</span></span>{recipientId === p.id ? <Check className="size-4 text-primary" /> : null}</button>) : <p className="py-6 text-center text-sm text-muted-foreground">No Payra users found.</p>}</div></div>
               <GradientButton className="w-full" onClick={continueToAmount}>Continue <ArrowRight className="size-4" /></GradientButton>
             </div>
           ) : null}
