@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Check, Search } from "lucide-react";
 import { AppShell } from "@/components/payra/app-shell";
 import { GradientButton, SoftButton, SectionHeading, SurfaceCard, SuccessState, TrustBadges } from "@/components/payra/ui-kit";
@@ -39,6 +39,7 @@ function SendPage() {
   const [sendError, setSendError] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [done, setDone] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let active = true;
@@ -53,9 +54,23 @@ function SendPage() {
         const { data, error } = await supabase.from("profiles").select("id, full_name, phone, avatar_url").neq("id", userId).order("full_name").limit(100);
         if (error) throw error;
         if (active) {
+          const loadedProfiles = (data ?? []) as Profile[];
           setWalletId(wallet.id);
           setBalance(Number(wallet.balance) || 0);
-          setProfiles((data ?? []) as Profile[]);
+          setProfiles(loadedProfiles);
+
+          const scannedRecipient = new URLSearchParams(window.location.search).get("recipient");
+          if (scannedRecipient) {
+            const match = loadedProfiles.find((p) => p.phone === scannedRecipient || p.id === scannedRecipient);
+            if (match) {
+              setRecipientId(match.id);
+              setStep(1);
+              setMethod("Scan QR");
+              toastSafe(`QR scanned: ${match.full_name}`);
+            } else {
+              setSendError("The scanned Payra recipient was not found.");
+            }
+          }
         }
       } catch (error) {
         if (active) setSendError(error instanceof Error ? error.message : "Unable to load wallet.");
@@ -122,7 +137,7 @@ function SendPage() {
 
           {!loading && step === 0 ? (
             <div className="space-y-5">
-              <div className="flex flex-wrap gap-2">{methods.map((m) => <button key={m} type="button" onClick={() => setMethod(m)} className={cn("rounded-xl border px-3.5 py-2 text-sm font-semibold", method === m ? "border-primary bg-accent text-accent-foreground" : "border-border text-muted-foreground hover:bg-muted")}>{m}</button>)}</div>
+              <div className="flex flex-wrap gap-2">{methods.map((m) => <button key={m} type="button" onClick={() => m === "Scan QR" ? navigate({ to: "/scan" }) : setMethod(m)} className={cn("rounded-xl border px-3.5 py-2 text-sm font-semibold", method === m ? "border-primary bg-accent text-accent-foreground" : "border-border text-muted-foreground hover:bg-muted")}>{m}</button>)}</div>
               <div className="relative"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by name or phone" aria-label="Search recipient" className="h-12 rounded-xl pl-9" /></div>
               <div><SectionHeading title="Payra users" /><div className="space-y-2">{filtered.length ? filtered.map((p) => <button key={p.id} type="button" onClick={() => setRecipientId(p.id)} className={cn("flex w-full items-center gap-3 rounded-2xl border p-3 text-left", recipientId === p.id ? "border-primary bg-accent/60" : "border-border hover:bg-muted")}><UserAvatar initials={p.full_name.split(" ").map((n) => n[0]).join("")} /><span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{p.full_name}</span><span className="block truncate text-xs text-muted-foreground">{p.phone ?? "Payra account"}</span></span>{recipientId === p.id ? <Check className="size-4 text-primary" /> : null}</button>) : <p className="py-6 text-center text-sm text-muted-foreground">No Payra users found.</p>}</div></div>
               <GradientButton className="w-full" onClick={continueToAmount}>Continue <ArrowRight className="size-4" /></GradientButton>
@@ -148,4 +163,9 @@ function SendPage() {
       <Dialog open={confirmOpen} onOpenChange={(open) => { setConfirmOpen(open); if (!open && !done) setSendError(""); }}><DialogContent className="rounded-3xl sm:max-w-md"><DialogHeader><DialogTitle>{done ? "Transfer complete" : "Confirm transfer"}</DialogTitle></DialogHeader>{sendError ? <div className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{sendError}</div> : null}{done ? <div className="space-y-6 py-2"><SuccessState title={`${formatBDT(value)} sent`} description={`${recipient?.full_name ?? "Recipient"} will receive it instantly.`} /><div className="flex gap-3"><Link to="/transactions" className="flex-1"><SoftButton className="w-full">View history</SoftButton></Link><Link to="/dashboard" className="flex-1"><GradientButton className="w-full">Done</GradientButton></Link></div></div> : <div className="space-y-5 py-2"><p className="text-sm text-muted-foreground">Send <strong>{formatBDT(value)}</strong> to <strong>{recipient?.full_name}</strong>?</p><GradientButton className="w-full" disabled={sending} onClick={confirmTransfer}>{sending ? "Sending…" : "Confirm & Send"}</GradientButton></div>}</DialogContent></Dialog>
     </AppShell>
   );
+}
+
+function toastSafe(message: string) {
+  // Keep this helper side-effect free if the notification system is unavailable during route hydration.
+  void message;
 }
